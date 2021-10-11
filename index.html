@@ -1,24 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Convergence Example</title>
-  <style type="text/css">
-    textarea {
-      margin-top: 20px;
-      height: 300px;
-      width: 300px;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/rxjs@6.6.2/bundles/rxjs.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@convergence/convergence/convergence.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@convergence/input-element-bindings/browser/convergence-input-element-bindings.min.js"></script>
-</head>
-<body>
-  <h2>A Collaborative Text Area</h2>
-  <div>(Open this in two browser windows side-by-side and start typing!)</div>
-  <textarea id="textarea"></textarea>
-  <script type="text/javascript" src="config.js"></script>
-  <script type="text/javascript" src="example.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Convergence Example</title>
+    <style type="text/css">
+      textarea {
+        margin-top: 20px;
+        height: 300px;
+        width: 300px;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/rxjs@6.6.2/bundles/rxjs.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@convergence/convergence/convergence.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@convergence/input-element-bindings/browser/convergence-input-element-bindings.min.js"></script>
+    <script
+      src="https://cdn.tiny.cloud/1/gl5xbc9pip13us5tyz0e9feoi998qo4map4n4tgo47n6zhjy/tinymce/5/tinymce.min.js"
+      referrerpolicy="origin"
+    ></script>
+  </head>
+  <body>
+    <h2>Collaboratie Text Area</h2>
+    <div>(Open this in two browser windows side-by-side and start typing!)</div>
+    <textarea id="textarea"></textarea>
+    <script type="text/javascript" src="config.js"></script>
+    <script type="text/javascript" src="example.js"></script>
+  </body>
 </html>
+<script>
+  tinymce.init({
+    selector: "textarea#textarea", // change this value according to your HTML
+    plugins: "rtc",
+    rtc_document_id: "unique-document-id",
+    rtc_encryption_provider: () => Promise.resolve({ key: "a secret key" }),
+
+    rtc_token_provider: ({ documentId }) =>
+      fetch("http://localhost:3000/jwt", {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ documentId }),
+      })
+        .then((response) => response.json())
+        .then(({ token }) => ({ token: token }))
+        .catch((error) => console.log("Failed to return a JWT\n" + error)),
+  });
+</script>

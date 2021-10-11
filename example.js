@@ -7,20 +7,25 @@ Convergence.connectAnonymously(DOMAIN_URL)
 
 // 2. Initializes the application after connecting by opening a model.
 function initApp(domain) {
+  console.log(domain);
+  console.log("init the application");
   const modelService = domain.models();
-  modelService.openAutoCreate({
-    collection: "example",
-    id: "getting-started",
-    data: { text: "Hello World" }
-  })
-  .then(initModel)
-  .catch((error) => {
-    console.log("Could not open model: " + error);
-  });
+  modelService
+    .openAutoCreate({
+      collection: "example",
+      id: "getting-started",
+      data: { text: "Hello World" },
+    })
+    .then(initModel)
+    .catch((error) => {
+      console.log("Could not open model: " + error);
+    });
 }
 
 // 3. Initializes the model once the model is open.
 function initModel(model) {
+  console.log(model);
+  console.log("init the model");
   const stringModel = model.elementAt("text");
   const textArea = document.getElementById("textarea");
 
