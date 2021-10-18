@@ -10,15 +10,64 @@ import { code } from 'react-icons-kit/feather/code';
 import { list } from 'react-icons-kit/feather/list';
 import { underline } from 'react-icons-kit/feather/underline';
 import { link2 } from 'react-icons-kit/feather/link2';
+import { checkSquare } from 'react-icons-kit/feather/checkSquare';
+import { Convergence } from "@convergence/convergence";
 
 import { ic_title } from 'react-icons-kit/md/ic_title';
 import { ic_format_quote } from 'react-icons-kit/md/ic_format_quote';
 import { BoldMark, ItalicMark, FormatToolbar } from './index';
 
+const DOMAIN_URL = "http://localhost:8000/api/realtime/convergence/default";
+
 export default class TextEditor extends Component {
 	state = {
 		value: InitialValue,
+		//text:"",
+
 	};
+	componentDidMount() {
+		this.initConvergence();
+	  }
+	componentDidUpdate() {
+		this.initConvergence();
+	  }
+
+	initConvergence() {
+		Convergence.connectAnonymously(DOMAIN_URL, "user")
+		  .then((domain) => {
+			//this.callSetDomain(domain);
+			this.initFile(domain);
+		  })
+		  .catch((err) => {
+			console.log("Could not connect to convergence", err);
+		  });
+	  }
+
+	  initFile(domain) {
+		domain
+		  .models()
+		  .openAutoCreate({
+			collection: "textEditor",
+			data: {
+			  text: "Hello World",
+			},
+			//id: this.modelId(),
+		  })
+		  .then((model) => {
+			//this.callSetState(model);
+			model
+			  .root()
+			  .get("text")
+			  .on("value", (e) => {
+				this.setState({ value: model.root().get("text").value() });
+			  });
+			this.initModel(model.root().get("text"));
+			//this.initSharedCursors(model.root().get("text"));
+		  })
+		  .catch((err) => {
+			console.error("Unable to open the model", err);
+		  });
+	  }
 
 	// On change, update the app's React state with the new editor value.
 	onChange = ({ value }) => {
@@ -74,6 +123,13 @@ export default class TextEditor extends Component {
 				return true;
 			}
 
+			case 'k': {
+				change.toggleMark('checkSquare');
+				return true;
+			}
+
+
+
 			default: {
 				return;
 			}
@@ -113,6 +169,18 @@ export default class TextEditor extends Component {
 				return (
 					<ul {...props.attributes}>
 						<li>{props.children}</li>
+					</ul>
+				);
+
+			case 'checkSquare':
+				//return <checkSquare {...props.attributes}>{props.children}</checkSquare>;
+				// return <checkSquare {...props}/>;
+				return (
+					<ul {...props.attributes} style={{listStyleType:"none"}}>
+						<li>
+						<input type="checkbox"/>
+						{props.children}
+						</li>
 					</ul>
 				);
 
@@ -219,6 +287,7 @@ export default class TextEditor extends Component {
 					{this.renderMarkIcon('italic', italic)}
 					{this.renderMarkIcon('code', code)}
 					{this.renderMarkIcon('list', list)}
+					{this.renderMarkIcon('checkSquare', checkSquare)}
 					{this.renderMarkIcon('underline', underline)}
 					{this.renderMarkIcon('quote', ic_format_quote)}
 					{this.renderLinkIcon('link', link2)}
